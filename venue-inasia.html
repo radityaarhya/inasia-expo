@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Prime Park</title>
+    <style>
+        :root {
+            --booth-yellow: #f1c40f;
+            --booth-border: #f39c12;
+            --border-red: #c0392b;
+            --zone-gray: #dcdcdc;
+            --zone-green: #a8e6cf;
+            --label-green: #27ae60;
+            --label-blue: #3498db;
+            --label-pink: #ffccd5;
+            --text-dark: #2c3e50;
+            --umkm-green: #d5f5e3;
+            --umkm-red: #c0392b;
+            --booked-gray: #95a5a6;
+            --group-border: 2px solid #555;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Main Map Container */
+        .map-container {
+            width: 100%;
+            max-width: 1000px;
+            min-width: 800px;
+            padding: 20px;
+            position: relative;
+            padding-bottom: 80px; /* Extra space for Legend */
+        }
+
+        /* Dimension Line Styling */
+        .dimension-wrapper {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            height: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .dimension-text {
+            font-weight: bold;
+            font-size: 18px;
+            background-color: white;
+            padding: 0 10px;
+            position: relative;
+            z-index: 2;
+            top: 10px; 
+        }
+
+        .dimension-line {
+            width: 100%; 
+            height: 2px;
+            background-color: #000;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .dimension-line::before, .dimension-line::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            width: 2px;
+            height: 12px;
+            background-color: #000;
+        }
+        .dimension-line::before { left: 0; }
+        .dimension-line::after { right: 0; }
+
+        /* --- MAIN HALL (Top Section) --- */
+        .layout-top-row {
+            display: flex;
+            gap: 15px;
+            height: 450px;
+            margin-bottom: 20px;
+        }
+
+        /* Red Bordered Box */
+        .prime-park-hall {
+            flex: 1;
+            border: 12px solid var(--border-red);
+            display: flex;
+            background-color: var(--zone-gray);
+            position: relative;
+        }
+
+        /* The 3 Internal Columns */
+        .hall-section {
+            border-right: 4px solid #333;
+            height: 100%;
+            position: relative;
+        }
+        
+        .hall-section:last-child {
+            border-right: none;
+        }
+
+        /* Park 1 (Left) */
+        .park-1 {
+            width: 42%;
+            position: relative;
+        }
+
+        /* Park 2 & 3 (Middle/Right) */
+        .park-2, .park-3 {
+            width: 29%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .vertical-label {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* Meeting Sidebar */
+        .meeting-sidebar {
+            width: 120px;
+            background-color: var(--zone-green);
+            border: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: default;
+            transition: none;
+        }
+        
+        .room:last-child { 
+            border-bottom: none; 
+            height: 40px; 
+            flex: 0 0 40px; 
+            background: linear-gradient(to right, white 25%, var(--zone-green) 25%);
+        }
+
+        /* --- BOOTHS --- */
+        .booth {
+            background-color: var(--booth-yellow);
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        /* Booked State Style */
+        .booth.booked, .booth-static.booked, .booth-red.booked {
+            background-color: var(--booked-gray);
+            color: #555;
+            border-color: #555;
+        }
+
+        /* --- PRIME PARK 1 COORDINATES (Standardized to TOP for alignment) --- */
+        
+        /* Top Row (6, 7, 8) */
+        .b-6 { top: 15px; left: 40px; }
+        .b-7 { top: 15px; left: 80px; }
+        .b-8 { top: 15px; left: 120px; }
+
+        /* Left Column (5 down to 1) */
+        .b-5 { left: 10px; top: 90px; }
+        .b-4 { left: 10px; top: 135px; }
+        .b-3 { left: 10px; top: 180px; }
+        .b-2 { left: 10px; top: 225px; }
+        .b-1 { left: 10px; top: 270px; }
+
+        /* Right Column (9 down to 12) */
+        .b-9  { right: 10px; top: 90px; }  /* Aligned with 5 */
+        .b-10 { right: 10px; top: 135px; } /* Aligned with 4 */
+        .b-11 { right: 10px; top: 180px; } /* Aligned with 3 */
+        .b-12 { right: 10px; top: 225px; } /* Aligned with 2 */
+
+        /* Center Cluster (13-16) */
+        .b-13 { left: 80px; top: 135px; }
+        .b-14 { left: 120px; top: 135px; }
+        .b-15 { left: 80px; top: 180px; }
+        .b-16 { left: 120px; top: 180px; }
+
+        .hall-label {
+            position: absolute;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .label-park-1 { top: 65px; left: 60px; }
+        
+        .green-label {
+            background-color: #1e7e34;
+            color: white;
+            font-size: 10px;
+            padding: 2px 4px;
+            position: absolute;
+            bottom: 0;
+            text-transform: uppercase;
+        }
+        .coffee-left { left: 10px; }
+        .coffee-right { right: 10px; }
+
+        .door-label {
+            position: absolute;
+            bottom: 5px;
+            font-weight: bold;
+            font-size: 18px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .makan-place {
+            position: absolute;
+            bottom: 0;
+            right: -40px;
+            width: 80px;
+            height: 50px;
+            background-color: #1e7e34;
+            color: white;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.2;
+            padding: 2px;
+            border: 1px solid #fff;
+        }
+
+        /* --- MIDDLE ROW --- */
+        .middle-row {
+            display: flex;
+            align-items: flex-end;
+            position: relative;
+            height: 160px;
+            border-bottom: 3px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .partition-group-1 {
+            position: absolute;
+            left: 20px;
+            bottom: 5px;
+        }
+        .partition-group-2 {
+            position: absolute;
+            left: 220px;
+            bottom: 5px;
+        }
+        .partition-group-3 {
+            position: absolute;
+            left: 500px;
+            bottom: 5px;
+        }
+        .partition-group-4 {
+            position: absolute;
+            right: 80px;
+            bottom: 5px;
+        }
+
+        .booth-static {
+            position: relative;
+            display: inline-flex;
+            margin: 2px;
+            width: 40px;
+            height: 40px;
+        }
+
+        /* Grouped booths with borders */
+        .booth-group {
+            display: flex;
+            border: var(--group-border);
+            margin: 2px;
+        }
+
+        /* Group 1 (17, 18, 19) */
+        .group-1-container {
+            display: flex;
+            align-items: flex-start; 
+        }
+
+        .b-17, .b-19 {
+            height: 60px;
+            width: 40px;
+        }
+        
+        .b-18-wrapper {
+            margin: 0 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-top: 40px;
+        }
+
+        .b-18 {
+            height: 40px;
+            width: 40px;
+        }
+
+        .partisi-label {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 2px;
+            display: block;
+            text-align: center;
+        }
+
+        .pink-zone {
+            width: 190px;
+            height: 50px;
+            background-color: var(--label-pink);
+            border: 2px solid #333;
+            margin-top: 5px;
+        }
+
+        .blue-zone {
+            width: 120px;
+            height: 40px;
+            background-color: var(--label-blue);
+            border: 2px solid #333;
+            margin-top: 5px;
+        }
+
+        .reg-area {
+            background-color: #1e7e34;
+            color: white;
+            width: 30px;
+            height: 90px;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            border: 2px solid #333;
+            margin-right: 5px;
+        }
+
+        /* --- BOTTOM AREA --- */
+        .bottom-area {
+            display: flex;
+            justify-content: space-between;
+            height: 300px;
+            position: relative;
+            margin-top: 20px;
+            background: linear-gradient(to bottom, #dcdcdc 0%, #bfbfbf 100%);
+            overflow: hidden;
+        }
+
+        .smoking-text {
+            position: absolute;
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #111;
+            line-height: 1;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .smoking-text span {
+            display: block;
+            font-size: 32px;
+        }
+
+        /* UMKM CONTAINER */
+        .umkm-wrapper {
+            position: absolute;
+            left: 35%; 
+            top: -10px; 
+            width: 380px; 
+            height: 320px; 
+            pointer-events: none; 
+        }
+
+        .umkm-bg-svg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            overflow: visible;
+        }
+
+        .umkm-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: auto;
+        }
+
+        .umkm-label {
+            font-size: 32px;
+            font-weight: bold;
+            position: absolute;
+            top: 90px;
+            left: 120px;
+            transform: rotate(39deg);
+            white-space: nowrap;
+        }
+
+        /* --- HOVER EFFECTS & BOOTH UPDATES --- */
+        
+        .booth, .booth-static, .booth-red {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+            cursor: pointer; /* Hand cursor */
+        }
+
+        /* Hover state: Pop up slightly */
+        .booth:hover, .booth-static:hover, .booth-red:hover {
+            transform: scale(1.15) translateY(-2px) !important;
+            z-index: 50;
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Red Booths inside UMKM */
+        .booth-red {
+            background-color: var(--umkm-red);
+            color: white;
+            border: 2px solid white;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            position: absolute;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* UMKM Booth Positions */
+        .br-1 { top: 115px; left: 160px; transform: rotate(310deg); }
+        .br-1:hover { transform: rotate(310deg) scale(1.15) translateY(-2px) !important; }
+
+        .br-2 { top: 140px; left: 190px; transform: rotate(310deg); }
+        .br-2:hover { transform: rotate(310deg) scale(1.15) translateY(-2px) !important; }
+        
+        .br-3 { bottom: 50px; right: 15px; width: 45px; height: 45px; } 
+        
+        .br-4 { top: 80px; right: 10px; }
+        .br-5 { top: 119px; right: 10px; }
+
+        /* "Partisi" Text Rotated */
+        .partisi-text-rot {
+            font-size: 10px;
+            position: absolute;
+            font-weight: bold;
+        }
+
+        /* Between 1 and 2 (Diagonal) */
+        .p-diagonal {
+            top: 120px;
+            left: 195px;
+            transform: rotate(40deg);
+        }
+
+        /* Between 4 and 5 (Vertical) */
+        .p-vertical {
+            top: 110px;
+            right: 37px;
+            transform: rotate(-90deg);
+        }
+
+        /* Above 3 (Horizontal) */
+        .p-horizontal {
+            bottom: 95px;
+            right: 20px;
+        }
+
+        .timeline-dots {
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: black;
+            border-radius: 50%;
+        }
+
+        /* --- LEGEND STYLES --- */
+        .legend-container {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            display: flex;
+            gap: 20px;
+            background: white;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+
+        /* --- CUSTOM FLOATING TOOLTIP STYLES --- */
+        .custom-tooltip {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 9999;
+            white-space: nowrap;
+            text-align: left;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transform: translate(-50%, -130%);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Tooltip Element -->
+    <div id="tooltip" class="custom-tooltip"></div>
+
+    <div class="map-container">
+        
+        <div class="dimension-wrapper">
+            <span class="dimension-text">20 M</span>
+            <div class="dimension-line"></div>
+        </div>
+
+        <!-- Main Top Block -->
+        <div class="layout-top-row">
+            <div class="prime-park-hall">
+                
+                <div class="hall-section park-1">
+                    <div class="hall-label label-park-1">PRIME PARK 1</div>
+                    
+                    <!-- Booths (Corrected Sequence 5->1 and 9->12 Top to Bottom) -->
+                    <div class="booth b-1" data-status="AVAILABLE" data-booth="1" data-price="Rp 5.000.000">1</div>
+                    <div class="booth b-2" data-status="AVAILABLE" data-booth="2" data-price="Rp 5.000.000">2</div>
+                    <div class="booth b-3" data-status="AVAILABLE" data-booth="3" data-price="Rp 5.000.000">3</div>
+                    <div class="booth b-4" data-status="AVAILABLE" data-booth="4" data-price="Rp 5.000.000">4</div>
+                    <div class="booth b-5" data-status="AVAILABLE" data-booth="5" data-price="Rp 5.000.000">5</div>
+
+                    <div class="booth b-6" data-status="AVAILABLE" data-booth="6" data-price="Rp 5.000.000">6</div>
+                    <div class="booth b-7" data-status="AVAILABLE" data-booth="7" data-price="Rp 5.000.000">7</div>
+                    <div class="booth b-8" data-status="AVAILABLE" data-booth="8" data-price="Rp 5.000.000">8</div>
+
+                    <div class="booth b-9" data-status="AVAILABLE" data-booth="9" data-price="Rp 5.000.000">9</div>
+                    <div class="booth b-10" data-status="AVAILABLE" data-booth="10" data-price="Rp 5.000.000">10</div>
+                    <div class="booth b-11" data-status="AVAILABLE" data-booth="11" data-price="Rp 5.000.000">11</div>
+                    
+                    <div class="booth b-12 booked" data-status="BOOKED" data-booth="12" data-price="Rp 5.000.000">12</div>
+
+                    <div class="booth b-13" data-status="AVAILABLE" data-booth="13" data-price="Rp 5.000.000">13</div>
+                    <div class="booth b-14" data-status="AVAILABLE" data-booth="14" data-price="Rp 5.000.000">14</div>
+                    <div class="booth b-15" data-status="AVAILABLE" data-booth="15" data-price="Rp 5.000.000">15</div>
+                    <div class="booth b-16" data-status="AVAILABLE" data-booth="16" data-price="Rp 5.000.000">16</div>
+
+                    <div class="green-label coffee-left">COFFEE BREAK</div>
+                    <div class="door-label">PINTU</div>
+                    <div class="green-label coffee-right">COFFEE BREAK</div>
+                </div>
+
+                <div class="hall-section park-2">
+                    <div class="vertical-label">PRIME PARK 2</div>
+                    <div class="door-label">PINTU</div>
+                    <div class="makan-place">TEMPAT<br>MAKAN</div>
+                </div>
+
+                <div class="hall-section park-3">
+                    <div class="vertical-label">PRIME PARK 3</div>
+                    <div class="door-label">PINTU</div>
+                </div>
+            </div>
+
+            <!-- Sidebar: Meeting Rooms -->
+            <div class="meeting-sidebar">
+                <div class="room">MERESE</div>
+                <div class="room">MALIMBU</div>
+                <div class="room">MEETING<br>VIP</div>
+                <div class="room"></div> 
+            </div>
+        </div>
+
+        <!-- Middle Row -->
+        <div class="middle-row">
+            
+            <div class="partition-group-1">
+                <div class="group-1-container">
+                    <div class="booth-static booth b-17" data-status="AVAILABLE" data-booth="17" data-price="Rp 5.000.000">17</div>
+                    <div class="b-18-wrapper">
+                        <span class="partisi-label">PARTISI</span>
+                        <div class="booth-static booth b-18" data-status="AVAILABLE" data-booth="18" data-price="Rp 5.000.000">18</div>
+                    </div>
+                    <div class="booth-static booth b-19" data-status="AVAILABLE" data-booth="19" data-price="Rp 5.000.000">19</div>
+                </div>
+            </div>
+
+            <div class="partition-group-2">
+                <span class="partisi-label" style="text-align:center; width: 100%;">PARTISI</span>
+                <div style="display:flex;">
+                    <!-- Grouped Booths 20 & 21 -->
+                    <div class="booth-group">
+                        <div class="booth-static booth" data-status="AVAILABLE" data-booth="20" data-price="Rp 5.000.000">20</div>
+                        <div class="booth-static booth" data-status="AVAILABLE" data-booth="21" data-price="Rp 5.000.000">21</div>
+                    </div>
+                    <!-- Grouped Booths 22 & 23 -->
+                    <div class="booth-group">
+                        <div class="booth-static booth" data-status="AVAILABLE" data-booth="22" data-price="Rp 5.000.000">22</div>
+                        <div class="booth-static booth" data-status="AVAILABLE" data-booth="23" data-price="Rp 5.000.000">23</div>
+                    </div>
+                </div>
+                <div class="pink-zone" style="width: 100%;"></div>
+            </div>
+
+            <div class="partition-group-3">
+                <div style="display:flex; align-items: flex-end;">
+                    <div class="reg-area">REGISTRASI AREA</div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <span class="partisi-label">PARTISI</span>
+                        <div class="booth-static booth" data-status="AVAILABLE" data-booth="24" data-price="Rp 5.000.000">24</div>
+                        <div class="blue-zone"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="partition-group-4">
+                <div style="display:flex;">
+                    <div class="booth-static booth" data-status="AVAILABLE" data-booth="25" data-price="Rp 5.000.000">25</div>
+                    <!-- Example Booked Booth -->
+                    <div class="booth-static booth booked" data-status="BOOKED" data-booth="26" data-price="Rp 5.000.000">26</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Area -->
+        <div class="bottom-area">
+            
+            <div class="smoking-text">
+                SMOKING
+                <span>AREA</span>
+            </div>
+
+            <!-- UMKM AREA -->
+            <div class="umkm-wrapper">
+                <svg class="umkm-bg-svg" viewBox="0 0 380 320">
+                    <path d="M 60 10 
+                             L 330 10 
+                             Q 370 10 370 50 
+                             L 370 260 
+                             Q 370 310 320 270
+                             L 60 60 
+                             Q 10 20 60 10 Z" 
+                          fill="#d5f5e3" 
+                          stroke="#c0392b" 
+                          stroke-width="4" 
+                          stroke-linejoin="round" />
+                </svg>
+                
+                <div class="umkm-content">
+                    <div class="umkm-label">BOOTH UMKM</div>
+                    
+                    <div class="booth-red br-1" data-status="AVAILABLE" data-booth="UMKM 1" data-price="Rp 2.500.000">1</div>
+                    <div class="booth-red br-2" data-status="AVAILABLE" data-booth="UMKM 2" data-price="Rp 2.500.000">2</div>
+
+                    <div class="booth-red br-3" data-status="AVAILABLE" data-booth="UMKM 3" data-price="Rp 2.500.000">3</div>
+                    
+                    <div class="booth-red br-4" data-status="AVAILABLE" data-booth="UMKM 4" data-price="Rp 2.500.000">4</div>
+                    <div class="booth-red br-5" data-status="AVAILABLE" data-booth="UMKM 5" data-price="Rp 2.500.000">5</div>
+
+                    <!-- Precise "PARTISI" Labels -->
+                    <span class="partisi-text-rot p-diagonal">PARTISI</span>
+                    <span class="partisi-text-rot p-vertical">PARTISI</span>
+                    <span class="partisi-text-rot p-horizontal">PARTISI</span>
+                </div>
+            </div>
+
+            <div class="timeline-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="legend-container">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f1c40f; border-color: #333;"></div>
+                <span>Regular Booth (Available)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #c0392b; border-color: white; outline: 1px solid #c0392b;"></div>
+                <span>UMKM Booth (Available)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #95a5a6; border-color: #555;"></div>
+                <span>BOOKED</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tooltip Logic -->
+    <script>
+        const tooltip = document.getElementById('tooltip');
+        const items = document.querySelectorAll('.booth, .booth-static, .booth-red');
+
+        document.addEventListener('mousemove', (e) => {
+            // Move tooltip with cursor
+            tooltip.style.left = e.clientX + 'px';
+            tooltip.style.top = e.clientY + 'px';
+        });
+
+        items.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const status = item.getAttribute('data-status');
+                const booth = item.getAttribute('data-booth');
+                const price = item.getAttribute('data-price');
+
+                if(status && booth && price) {
+                    // Color code the status line
+                    const statusColor = status === 'BOOKED' ? '#ff6b6b' : '#4cd137';
+
+                    tooltip.innerHTML = `
+                        <div style="font-weight: 800; color: ${statusColor}; margin-bottom: 4px;">${status}</div>
+                        <div>Booth: <span style="font-weight: normal">${booth}</span></div>
+                        <div>Price: <span style="font-weight: normal">${price}</span></div>
+                    `;
+                    tooltip.style.opacity = '1';
+                }
+            });
+
+            item.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        });
+    </script>
+
+</body>
+</html>
