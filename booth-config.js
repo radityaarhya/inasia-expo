@@ -15,6 +15,7 @@ const defaults = {
 const boothData = {
   // --- BOOKED BOOTHS ---
   12: { status: "BOOKED", name: "PT. Fahrenheit" },
+  22: { status: "BOOKED", name: "MindRay" },
   23: { status: "BOOKED", name: "Fresenius" },
 
   // Cara mengisi:
