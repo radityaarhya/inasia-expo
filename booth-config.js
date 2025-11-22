@@ -17,6 +17,7 @@ const boothData = {
   12: { status: "BOOKED", name: "PT. Fahrenheit" },
   22: { status: "BOOKED", name: "MindRay" },
   23: { status: "BOOKED", name: "Fresenius" },
+       26: { status: "BOOKED", name: "MindRay" },
 
   // Cara mengisi:
   //"10": { status: "AVAILABLE", price: "Rp 6.000.000", name: "Premium Corner" },
